@@ -74,7 +74,7 @@ Page *BufferPoolManager::FetchPageImpl(page_id_t page_id) {
 
 bool BufferPoolManager::UnpinPageImpl(page_id_t page_id, bool is_dirty) {
   std::scoped_lock guard(latch_);
-  if (page_table_.find(page_id) != page_table_.end()) {
+  if (page_table_.find(page_id) == page_table_.end()) {
     return false;
   }
 

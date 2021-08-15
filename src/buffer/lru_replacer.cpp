@@ -26,7 +26,7 @@ bool LRUReplacer::Victim(frame_id_t *frame_id) {
   *frame_id = list_.front();
   hash_table_.erase(list_.front());
   list_.pop_front();
-  return false;
+  return true;
 }
 
 void LRUReplacer::Pin(frame_id_t frame_id) {
@@ -42,7 +42,7 @@ void LRUReplacer::Unpin(frame_id_t frame_id) {
   if (hash_table_.find(frame_id) == hash_table_.end()) {
     list_.emplace_back(frame_id);
     hash_table_[frame_id] = std::prev(list_.end());
-    assert(list_.size()<=num_pages_);
+    assert(list_.size() <= num_pages_);
   }
 }
 
