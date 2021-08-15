@@ -92,7 +92,7 @@ bool BufferPoolManager::UnpinPageImpl(page_id_t page_id, bool is_dirty) {
 bool BufferPoolManager::FlushPageImpl(page_id_t page_id) {
   std::scoped_lock guard(latch_);
   // Make sure you call DiskManager::WritePage!
-  if (page_table_.find(page_id) != page_table_.end()) {
+  if (page_table_.find(page_id) == page_table_.end()) {
     return false;
   }
   frame_id_t frame_id = page_table_[page_id];
@@ -147,7 +147,7 @@ bool BufferPoolManager::DeletePageImpl(page_id_t page_id) {
   // 0.   Make sure you call DiskManager::DeallocatePage!
   // 1.   Search the page table for the requested page (P).
   // 1.   If P does not exist, return true.
-  if (page_table_.find(page_id) != page_table_.end()) {
+  if (page_table_.find(page_id) == page_table_.end()) {
     return true;
   }
   frame_id_t frame_id = page_table_[page_id];
