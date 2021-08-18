@@ -28,10 +28,9 @@ INDEX_TEMPLATE_ARGUMENTS
 void B_PLUS_TREE_INTERNAL_PAGE_TYPE::Init(page_id_t page_id, page_id_t parent_id, int max_size) {
   page_type_ = IndexPageType::INTERNAL_PAGE;
   size_ = 0;
-  page_id_ = page_id; 
+  page_id_ = page_id;
   parent_page_id_ = parent_page_id_;
   max_size_ = max_size;
-  array[0] = {KeyType(), INVALID_PAGE_ID};
 }
 /*
  * Helper method to get/set the key associated with input "index"(a.k.a
@@ -41,10 +40,7 @@ INDEX_TEMPLATE_ARGUMENTS
 KeyType B_PLUS_TREE_INTERNAL_PAGE_TYPE::KeyAt(int index) const { return array[index].first; }
 
 INDEX_TEMPLATE_ARGUMENTS
-void B_PLUS_TREE_INTERNAL_PAGE_TYPE::SetKeyAt(int index, const KeyType &key) {
-  key_map_[key] = index;
-  array[index] = {key, INVALID_PAGE_ID};
-}
+void B_PLUS_TREE_INTERNAL_PAGE_TYPE::SetKeyAt(int index, const KeyType &key) { array[index] = {key, INVALID_PAGE_ID}; }
 
 /*
  * Helper method to find and return array index(or offset), so that its value
@@ -85,6 +81,7 @@ ValueType B_PLUS_TREE_INTERNAL_PAGE_TYPE::Lookup(const KeyType &key, const KeyCo
       right = mid;
     } else {
       left = mid + 1;
+    }
   }
   return array[left - 1].second;
 }
