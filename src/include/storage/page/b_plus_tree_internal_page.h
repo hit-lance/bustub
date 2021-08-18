@@ -11,6 +11,7 @@
 #pragma once
 
 #include <queue>
+#include <map>
 
 #include "storage/page/b_plus_tree_page.h"
 
@@ -62,5 +63,6 @@ class BPlusTreeInternalPage : public BPlusTreePage {
   void CopyLastFrom(const MappingType &pair, BufferPoolManager *buffer_pool_manager);
   void CopyFirstFrom(const MappingType &pair, BufferPoolManager *buffer_pool_manager);
   MappingType array[0];
+  std::map<KeyType, int> key_map_;
 };
 }  // namespace bustub
