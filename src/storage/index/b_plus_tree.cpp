@@ -206,18 +206,18 @@ void BPLUSTREE_TYPE::InsertIntoParent(BPlusTreePage *old_node, const KeyType &ke
     // ToString(old_node, buffer_pool_manager_);
     // std::cout<<"new node"<<std::endl;
     // ToString(new_node, buffer_pool_manager_);
-    KeyType middle_key = parent->KeyAt((parent->GetMaxSize()+1)/2);
+    KeyType middle_key = parent->KeyAt((parent->GetMaxSize() + 1) / 2);
     // std::cout<<"parent"<<std::endl;
     // ToString(parent, buffer_pool_manager_);
-    InternalPage* new_inner = Split(parent);
+    InternalPage *new_inner = Split(parent);
     // std::cout<<"new inner"<<std::endl;
     // ToString(new_inner, buffer_pool_manager_);
     assert(comparator_(key, middle_key));
-    if(comparator_(key, middle_key)==1) {
+    if (comparator_(key, middle_key) == 1) {
       new_inner->InsertNodeAfter(old_node->GetPageId(), key, new_node->GetPageId());
       new_node->SetParentPageId(new_inner->GetPageId());
-    }else {
-      parent->InsertNodeAfter(old_node->GetPageId(), key, new_node->GetPageId()); 
+    } else {
+      parent->InsertNodeAfter(old_node->GetPageId(), key, new_node->GetPageId());
       new_node->SetParentPageId(parent->GetPageId());
     }
     InsertIntoParent(parent, middle_key, new_inner);

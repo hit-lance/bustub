@@ -75,7 +75,8 @@ ValueType B_PLUS_TREE_INTERNAL_PAGE_TYPE::ValueAt(int index) const { return arra
  */
 INDEX_TEMPLATE_ARGUMENTS
 ValueType B_PLUS_TREE_INTERNAL_PAGE_TYPE::Lookup(const KeyType &key, const KeyComparator &comparator) const {
-  int left = 1, right = GetSize();
+  int left = 1;
+  int right = GetSize();
   while (left < right) {
     int mid = left + (right - left) / 2;
     // if (array[mid].first > key)
@@ -130,8 +131,7 @@ int B_PLUS_TREE_INTERNAL_PAGE_TYPE::InsertNodeAfter(const ValueType &old_value, 
 INDEX_TEMPLATE_ARGUMENTS
 void B_PLUS_TREE_INTERNAL_PAGE_TYPE::MoveHalfTo(BPlusTreeInternalPage *recipient,
                                                 BufferPoolManager *buffer_pool_manager) {
-  
-  int middle_key_index = (GetMaxSize()+1)/2;
+  int middle_key_index = (GetMaxSize() + 1) / 2;
   recipient->CopyNFrom(&array[middle_key_index], GetMaxSize() - middle_key_index, buffer_pool_manager);
   SetSize(middle_key_index);
 }
