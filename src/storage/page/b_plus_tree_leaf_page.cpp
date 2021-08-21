@@ -134,7 +134,7 @@ bool B_PLUS_TREE_LEAF_PAGE_TYPE::Lookup(const KeyType &key, ValueType *value, co
   while (left <= right) {
     int mid = left + (right - left) / 2;
     if (comparator(array[mid].first, key) == 0) {  // if (array[mid].first == key)
-      *value = array[left].second;
+      *value = array[mid].second;
       return true;
     }
     if (comparator(array[mid].first, key) == 1) {  // if (array[mid].first > key)
