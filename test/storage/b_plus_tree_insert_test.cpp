@@ -106,7 +106,6 @@ TEST(BPlusTreeTests, InsertTest2) {
     EXPECT_EQ(rids.size(), 1);
 
     int64_t value = key & 0xFFFFFFFF;
-    std::cout<<rids[0].GetSlotNum()<<" "<<value<<std::endl;
     EXPECT_EQ(rids[0].GetSlotNum(), value);
   }
 
