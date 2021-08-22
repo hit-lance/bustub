@@ -63,6 +63,7 @@ Page *BufferPoolManager::FetchPageImpl(page_id_t page_id) {
     page_table_.erase(pages_[frame_id].page_id_);
   }
   // 4.     Update P's metadata, read in the page content from disk, and then return a pointer to P.
+  replacer_->Pin(frame_id);
   pages_[frame_id].ResetMemory();
   page_table_[page_id] = frame_id;
   disk_manager_->ReadPage(page_id, pages_[frame_id].data_);
@@ -133,6 +134,7 @@ Page *BufferPoolManager::NewPageImpl(page_id_t *page_id) {
   }
   // 3.   Update P's metadata, zero out memory and add P to the page table.
   // 4.   Set the page ID output parameter. Return a pointer to P.
+  replacer_->Pin(frame_id);
   *page_id = disk_manager_->AllocatePage();
   pages_[frame_id].ResetMemory();
   page_table_[*page_id] = frame_id;
