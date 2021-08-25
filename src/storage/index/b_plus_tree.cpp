@@ -403,9 +403,7 @@ INDEXITERATOR_TYPE BPLUSTREE_TYPE::Begin(const KeyType &key) {
  * @return : index iterator
  */
 INDEX_TEMPLATE_ARGUMENTS
-INDEXITERATOR_TYPE BPLUSTREE_TYPE::end() {
-  return {INVALID_PAGE_ID, 0, buffer_pool_manager_};
-}
+INDEXITERATOR_TYPE BPLUSTREE_TYPE::end() { return {INVALID_PAGE_ID, 0, buffer_pool_manager_}; }
 
 /*****************************************************************************
  * UTILITIES AND DEBUG
