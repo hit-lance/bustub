@@ -50,7 +50,20 @@ void B_PLUS_TREE_LEAF_PAGE_TYPE::SetNextPageId(page_id_t next_page_id) { next_pa
  * NOTE: This method is only used when generating index iterator
  */
 INDEX_TEMPLATE_ARGUMENTS
-int B_PLUS_TREE_LEAF_PAGE_TYPE::KeyIndex(const KeyType &key, const KeyComparator &comparator) const { return 0; }
+int B_PLUS_TREE_LEAF_PAGE_TYPE::KeyIndex(const KeyType &key, const KeyComparator &comparator) const {
+  int left = 0;
+  int right = GetSize();
+  while (left < right) {
+    int mid = left + (right - left) / 2;
+    // if (array[mid].first >= key)
+    if (comparator(array[mid].first, key) != -1) {
+      right = mid;
+    } else {
+      left = mid + 1;
+    }
+  }
+  return left;
+}
 
 /*
  * Helper method to find and return the key associated with input "index"(a.k.a
@@ -184,10 +197,12 @@ int B_PLUS_TREE_LEAF_PAGE_TYPE::RemoveAndDeleteRecord(const KeyType &key, const 
  * to update the next_page id in the sibling page
  */
 INDEX_TEMPLATE_ARGUMENTS
-void B_PLUS_TREE_LEAF_PAGE_TYPE::MoveAllTo(BPlusTreeLeafPage *recipient, const KeyType &middle_key, BufferPoolManager *buffer_pool_manager) {
+void B_PLUS_TREE_LEAF_PAGE_TYPE::MoveAllTo(BPlusTreeLeafPage *recipient, const KeyType &middle_key,
+                                           BufferPoolManager *buffer_pool_manager) {
   for (int i = 0; i < GetSize(); ++i) {
     recipient->CopyLastFrom(array[i]);
   }
+  recipient->SetNextPageId(GetNextPageId());
   SetSize(0);
 }
 
@@ -198,7 +213,8 @@ void B_PLUS_TREE_LEAF_PAGE_TYPE::MoveAllTo(BPlusTreeLeafPage *recipient, const K
  * Remove the first key & value pair from this page to "recipient" page.
  */
 INDEX_TEMPLATE_ARGUMENTS
-void B_PLUS_TREE_LEAF_PAGE_TYPE::MoveFirstToEndOf(BPlusTreeLeafPage *recipient, const KeyType &middle_key, BufferPoolManager *buffer_pool_manager) {
+void B_PLUS_TREE_LEAF_PAGE_TYPE::MoveFirstToEndOf(BPlusTreeLeafPage *recipient, const KeyType &middle_key,
+                                                  BufferPoolManager *buffer_pool_manager) {
   recipient->CopyLastFrom(array[0]);
   for (int i = 0; i < GetSize() - 1; ++i) {
     array[i] = array[i + 1];
@@ -220,7 +236,8 @@ void B_PLUS_TREE_LEAF_PAGE_TYPE::CopyLastFrom(const MappingType &item) {
  * Remove the last key & value pair from this page to "recipient" page.
  */
 INDEX_TEMPLATE_ARGUMENTS
-void B_PLUS_TREE_LEAF_PAGE_TYPE::MoveLastToFrontOf(BPlusTreeLeafPage *recipient, const KeyType &middle_key, BufferPoolManager *buffer_pool_manager) {
+void B_PLUS_TREE_LEAF_PAGE_TYPE::MoveLastToFrontOf(BPlusTreeLeafPage *recipient, const KeyType &middle_key,
+                                                   BufferPoolManager *buffer_pool_manager) {
   recipient->CopyFirstFrom(array[GetSize() - 1]);
   IncreaseSize(-1);
 }

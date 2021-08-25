@@ -195,7 +195,13 @@ ValueType B_PLUS_TREE_INTERNAL_PAGE_TYPE::RemoveAndReturnOnlyChild() {
  */
 INDEX_TEMPLATE_ARGUMENTS
 void B_PLUS_TREE_INTERNAL_PAGE_TYPE::MoveAllTo(BPlusTreeInternalPage *recipient, const KeyType &middle_key,
-                                               BufferPoolManager *buffer_pool_manager) {}
+                                               BufferPoolManager *buffer_pool_manager) {
+  array[0].first = middle_key;
+  for (int i = 0; i < GetSize(); ++i) {
+    recipient->CopyLastFrom(array[i], buffer_pool_manager);
+  }
+  SetSize(0);
+}
 
 /*****************************************************************************
  * REDISTRIBUTE
