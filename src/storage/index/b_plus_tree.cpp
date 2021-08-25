@@ -229,7 +229,6 @@ void BPLUSTREE_TYPE::Remove(const KeyType &key, Transaction *transaction) {
     Page *page = FindLeafPage(key);
     LeafPage *leaf = reinterpret_cast<LeafPage *>(page->GetData());
     int old_leaf_size = leaf->GetSize();
-    assert(old_leaf_size >= leaf->GetMinSize());
     int new_leaf_size = leaf->RemoveAndDeleteRecord(key, comparator_);
     if (old_leaf_size == new_leaf_size) {  // key not found
       buffer_pool_manager_->UnpinPage(page->GetPageId(), false);

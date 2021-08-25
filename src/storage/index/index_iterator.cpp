@@ -18,9 +18,7 @@ INDEX_TEMPLATE_ARGUMENTS
 INDEXITERATOR_TYPE::~IndexIterator() = default;
 
 INDEX_TEMPLATE_ARGUMENTS
-bool INDEXITERATOR_TYPE::isEnd() {
-  return page_id_==INVALID_PAGE_ID&&index_==0;
-}
+bool INDEXITERATOR_TYPE::isEnd() { return page_id_ == INVALID_PAGE_ID && index_ == 0; }
 
 INDEX_TEMPLATE_ARGUMENTS
 const MappingType &INDEXITERATOR_TYPE::operator*() {
