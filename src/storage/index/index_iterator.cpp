@@ -19,10 +19,7 @@ INDEXITERATOR_TYPE::~IndexIterator() = default;
 
 INDEX_TEMPLATE_ARGUMENTS
 bool INDEXITERATOR_TYPE::isEnd() {
-  LeafPage *leaf = reinterpret_cast<LeafPage *>(buffer_pool_manager_->FetchPage(page_id_)->GetData());
-  bool is_end = leaf->GetNextPageId() == INVALID_PAGE_ID && index_ >= leaf->GetMaxSize();
-  buffer_pool_manager_->UnpinPage(page_id_, false);
-  return is_end;
+  return page_id_==INVALID_PAGE_ID&&index_==0;
 }
 
 INDEX_TEMPLATE_ARGUMENTS
@@ -35,7 +32,7 @@ INDEX_TEMPLATE_ARGUMENTS
 INDEXITERATOR_TYPE &INDEXITERATOR_TYPE::operator++() {
   assert(!isEnd());
   LeafPage *leaf = reinterpret_cast<LeafPage *>(buffer_pool_manager_->FetchPage(page_id_)->GetData());
-  if (index_ < leaf->GetMaxSize() - 1) {
+  if (index_ < leaf->GetSize() - 1) {
     ++index_;
   } else {
     page_id_ = leaf->GetNextPageId();

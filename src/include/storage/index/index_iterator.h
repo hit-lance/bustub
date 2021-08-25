@@ -40,7 +40,8 @@ class IndexIterator {
 
   bool operator!=(const IndexIterator &itr) const { return !(*this == itr); }
 
- private:
+//  private:
+ public:
   // add your own private member variables here
   page_id_t page_id_;
   int index_;
