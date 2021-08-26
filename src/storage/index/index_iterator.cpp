@@ -23,6 +23,7 @@ bool INDEXITERATOR_TYPE::isEnd() { return page_id_ == INVALID_PAGE_ID && index_ 
 INDEX_TEMPLATE_ARGUMENTS
 const MappingType &INDEXITERATOR_TYPE::operator*() {
   LeafPage *leaf = reinterpret_cast<LeafPage *>(buffer_pool_manager_->FetchPage(page_id_)->GetData());
+  buffer_pool_manager_->UnpinPage(leaf->GetPageId(), false);
   return leaf->GetItem(index_);
 }
 
@@ -35,8 +36,8 @@ INDEXITERATOR_TYPE &INDEXITERATOR_TYPE::operator++() {
   } else {
     page_id_ = leaf->GetNextPageId();
     index_ = 0;
-    buffer_pool_manager_->UnpinPage(leaf->GetPageId(), false);
   }
+  buffer_pool_manager_->UnpinPage(leaf->GetPageId(), false);
   return *this;
 }
 

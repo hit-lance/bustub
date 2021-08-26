@@ -159,7 +159,7 @@ bool BufferPoolManager::DeletePageImpl(page_id_t page_id) {
   }
   // 3.   Otherwise, P can be deleted. Remove P from the page table, reset its metadata and return it to the free list.
   disk_manager_->DeallocatePage(page_id);
-  replacer_->Unpin(frame_id);
+  // replacer_->Unpin(frame_id);
   page_table_.erase(page_id);
   pages_[frame_id].ResetMemory();
   pages_[frame_id].pin_count_ = 0;

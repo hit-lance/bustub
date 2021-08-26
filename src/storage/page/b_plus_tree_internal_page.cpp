@@ -268,10 +268,10 @@ void B_PLUS_TREE_INTERNAL_PAGE_TYPE::CopyFirstFrom(const MappingType &pair, Buff
   for (int i = GetSize(); i > 1; --i) {
     array[i] = array[i - 1];
   }
-  array[1].second = array[0].second;
-  array[1].first = pair.first;
-  array[0].second = pair.second;
-
+  // array[1].second = array[0].second;
+  // array[1].first = pair.first;
+  // array[0].second = pair.second;
+  array[1] = pair;
   BPlusTreePage *page = reinterpret_cast<BPlusTreePage *>(buffer_pool_manager->FetchPage(pair.second)->GetData());
   page->SetParentPageId(GetPageId());
   buffer_pool_manager->UnpinPage(pair.second, true);

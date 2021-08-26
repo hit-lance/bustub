@@ -184,8 +184,8 @@ int B_PLUS_TREE_LEAF_PAGE_TYPE::RemoveAndDeleteRecord(const KeyType &key, const 
     for (int i = index; i < GetSize() - 1; ++i) {
       array[i] = array[i + 1];
     }
+    IncreaseSize(-1);
   }
-  IncreaseSize(-1);
   return GetSize();
 }
 
@@ -227,7 +227,7 @@ void B_PLUS_TREE_LEAF_PAGE_TYPE::MoveFirstToEndOf(BPlusTreeLeafPage *recipient, 
  */
 INDEX_TEMPLATE_ARGUMENTS
 void B_PLUS_TREE_LEAF_PAGE_TYPE::CopyLastFrom(const MappingType &item) {
-  assert(GetSize() < GetMaxSize() - 1);
+  assert(GetSize() < GetMaxSize());
   array[GetSize()] = item;
   IncreaseSize(1);
 }
@@ -247,8 +247,8 @@ void B_PLUS_TREE_LEAF_PAGE_TYPE::MoveLastToFrontOf(BPlusTreeLeafPage *recipient,
  */
 INDEX_TEMPLATE_ARGUMENTS
 void B_PLUS_TREE_LEAF_PAGE_TYPE::CopyFirstFrom(const MappingType &item) {
-  assert(GetSize() < GetMaxSize() - 1);
-  for (int i = GetMaxSize(); i >= 1; ++i) {
+  assert(GetSize() < GetMaxSize());
+  for (int i = GetSize(); i > 0; --i) {
     array[i] = array[i - 1];
   }
   array[0] = item;
