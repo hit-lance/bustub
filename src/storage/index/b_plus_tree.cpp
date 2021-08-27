@@ -26,7 +26,9 @@ BPLUSTREE_TYPE::BPlusTree(std::string name, BufferPoolManager *buffer_pool_manag
       buffer_pool_manager_(buffer_pool_manager),
       comparator_(comparator),
       leaf_max_size_(leaf_max_size),
-      internal_max_size_(internal_max_size) {}
+      internal_max_size_(internal_max_size) {
+  std::cout << internal_max_size << " " << leaf_max_size << " " << buffer_pool_manager_->GetPoolSize() << std::endl;
+}
 
 /*
  * Helper function to decide whether current b+tree is empty
@@ -121,6 +123,7 @@ bool BPLUSTREE_TYPE::InsertIntoLeaf(const KeyType &key, const ValueType &value, 
   leaf->Insert(key, value, comparator_);
   if (leaf->GetSize() == leaf_max_size_) {
     LeafPage *new_leaf = Split(leaf);
+    new_leaf->SetNextPageId(leaf->GetNextPageId());
     leaf->SetNextPageId(new_leaf->GetPageId());
     InsertIntoParent(leaf, new_leaf->KeyAt(0), new_leaf);
   } else {
@@ -230,6 +233,7 @@ void BPLUSTREE_TYPE::Remove(const KeyType &key, Transaction *transaction) {
     LeafPage *leaf = reinterpret_cast<LeafPage *>(page->GetData());
     int old_leaf_size = leaf->GetSize();
     int new_leaf_size = leaf->RemoveAndDeleteRecord(key, comparator_);
+    assert(new_leaf_size < leaf->GetMaxSize());
     if (old_leaf_size == new_leaf_size) {  // key not found
       buffer_pool_manager_->UnpinPage(leaf->GetPageId(), false);
     } else {
@@ -258,6 +262,7 @@ bool BPLUSTREE_TYPE::CoalesceOrRedistribute(N *node, Transaction *transaction) {
     return false;
   }
   Page *parent_page = buffer_pool_manager_->FetchPage(node->GetParentPageId());
+  assert(parent_page != nullptr);
   InternalPage *parent = reinterpret_cast<InternalPage *>(parent_page->GetData());
   assert(parent->GetSize() > 1);
   int index = parent->ValueIndex(node->GetPageId());
@@ -266,7 +271,9 @@ bool BPLUSTREE_TYPE::CoalesceOrRedistribute(N *node, Transaction *transaction) {
   N *sibling = reinterpret_cast<N *>(buffer_pool_manager_->FetchPage(parent->ValueAt(sibling_index))->GetData());
   assert(sibling != nullptr);
   // std::cout<<sibling->GetSize()<< " "<<node->GetSize()<<std::endl;
-  if (sibling->GetSize() + node->GetSize() > node->GetMaxSize()) {
+  bool need_redistribute = node->IsLeafPage() ? sibling->GetSize() + node->GetSize() >= node->GetMaxSize()
+                                              : sibling->GetSize() + node->GetSize() > node->GetMaxSize();
+  if (need_redistribute) {
     buffer_pool_manager_->UnpinPage(parent->GetPageId(), false);
     Redistribute(sibling, node, index);
     return false;
@@ -325,9 +332,10 @@ template <typename N>
 void BPLUSTREE_TYPE::Redistribute(N *neighbor_node, N *node, int index) {
   InternalPage *parent =
       reinterpret_cast<InternalPage *>(buffer_pool_manager_->FetchPage(node->GetParentPageId())->GetData());
+  assert(parent != nullptr);
   assert(parent->GetSize() > 1);
   if (index == 0) {  // node->neighbor_node
-    KeyType new_middle_key = neighbor_node->IsLeafPage() ? neighbor_node->KeyAt(0) : neighbor_node->KeyAt(1);
+    KeyType new_middle_key = neighbor_node->KeyAt(1);
     neighbor_node->MoveFirstToEndOf(node, parent->KeyAt(1), buffer_pool_manager_);
     parent->SetKeyAt(1, new_middle_key);
   } else {  // neighbor_node->node
@@ -431,8 +439,6 @@ Page *BPLUSTREE_TYPE::FindLeafPage(const KeyType &key, bool leftMost) {
   Page *page = buffer_pool_manager_->FetchPage(page_id);
   assert(page != nullptr);
   BPlusTreePage *node = reinterpret_cast<BPlusTreePage *>(page->GetData());
-  // std::cout << buffer_pool_manager_->free_list_.size() << " " << buffer_pool_manager_->replacer_->Size() <<
-  // std::endl;
 
   while (!node->IsLeafPage()) {
     InternalPage *inner = static_cast<InternalPage *>(node);
@@ -441,8 +447,6 @@ Page *BPLUSTREE_TYPE::FindLeafPage(const KeyType &key, bool leftMost) {
     } else {
       page_id = inner->Lookup(key, comparator_);
     }
-    // std::cout << buffer_pool_manager_->free_list_.size() << " " << buffer_pool_manager_->replacer_->Size() <<
-    // std::endl;
     buffer_pool_manager_->UnpinPage(node->GetPageId(), false);
 
     page = buffer_pool_manager_->FetchPage(page_id);
