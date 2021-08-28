@@ -110,25 +110,16 @@ TEST(BPlusTreeTests, MixTest) {
   std::cout << std::endl;
 
   std::vector<int64_t> remove_keys;
-  // std::cout<<"remove keys: "<<std::endl;
   for (int64_t j = 0; j <= 1600; j = j + 2) {
     remove_keys.emplace_back(j);
-    // std::cout<<j<<" ";
   }
   std::random_shuffle(remove_keys.begin(), remove_keys.end());
-  // size_t rsize = remove_keys.size();
 
   for (auto key : remove_keys) {
     index_key.SetFromInteger(key);
     tree.Remove(index_key, transaction);
   }
-  std::cout << "here\n";
-  // tree.Print(bpm);
-  // for (auto iterator = tree.begin(); iterator != tree.end(); ++iterator) {
-  //   if ((*iterator).second.GetSlotNum() % 2 == 0) {
-  //     std::cout << (*iterator).second.GetSlotNum() << " ";
-  //   }
-  // }
+
   std::cout << std::endl;
   for (auto key : remove_keys) {
     int64_t value = key & 0xFFFFFFFF;
@@ -137,16 +128,10 @@ TEST(BPlusTreeTests, MixTest) {
     tree.Insert(index_key, rid, transaction);
   }
 
-  // for (auto iterator = tree.begin(); iterator != tree.end(); ++iterator) {
-  //   std::cout<<(*iterator).second.GetSlotNum()<< " ";
-  // }
-  // std::cout<<std::endl;
   int64_t current_key = 1;
   index_key.SetFromInteger(current_key);
 
   for (auto iterator = tree.begin(); iterator != tree.end(); ++iterator) {
-    // auto location = (*iterator).second;
-    // EXPECT_EQ(location.GetSlotNum(), current_key);
     current_key = current_key + 1;
   }
 
@@ -159,7 +144,7 @@ TEST(BPlusTreeTests, MixTest) {
   remove("test.log");
 }
 
-TEST(BPlusTreeTests, DISABLED_ScaleTest) {
+TEST(BPlusTreeTests, ScaleTest) {
   // create KeyComparator and index schema
   std::string createStmt = "a bigint";
   Schema *key_schema = ParseCreateStatement(createStmt);
@@ -213,7 +198,7 @@ TEST(BPlusTreeTests, DISABLED_ScaleTest) {
   remove("test.log");
 }
 
-TEST(BPlusTreeTests, DISABLED_DeleteTest1) {
+TEST(BPlusTreeTests, DeleteTest1) {
   // create KeyComparator and index schema
   std::string createStmt = "a bigint";
   Schema *key_schema = ParseCreateStatement(createStmt);
@@ -293,7 +278,7 @@ TEST(BPlusTreeTests, DISABLED_DeleteTest1) {
   remove("test.log");
 }
 
-TEST(BPlusTreeTests, DISABLED_DeleteTest2) {
+TEST(BPlusTreeTests, DeleteTest2) {
   // create KeyComparator and index schema
   Schema *key_schema = ParseCreateStatement("a bigint");
   GenericComparator<8> comparator(key_schema);
