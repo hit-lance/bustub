@@ -24,6 +24,9 @@ namespace bustub {
 
 #define INDEX_TEMPLATE_ARGUMENTS template <typename KeyType, typename ValueType, typename KeyComparator>
 
+// define op type enum
+enum class BPlusTreeOpType { SEARCH = 0, INSERT, REMOVE };
+
 // define page type enum
 enum class IndexPageType { INVALID_INDEX_PAGE = 0, LEAF_PAGE, INTERNAL_PAGE };
 

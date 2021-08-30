@@ -255,6 +255,17 @@ void B_PLUS_TREE_LEAF_PAGE_TYPE::CopyFirstFrom(const MappingType &item) {
   IncreaseSize(1);
 }
 
+INDEX_TEMPLATE_ARGUMENTS
+bool B_PLUS_TREE_LEAF_PAGE_TYPE::IsSafe(BPlusTreeOpType op_type) {
+  bool is_safe = true;
+  if (op_type == BPlusTreeOpType::INSERT) {
+    is_safe = GetSize() < GetMaxSize() - 1;
+  } else if (op_type == BPlusTreeOpType::REMOVE) {
+    is_safe = IsRootPage() ? GetSize() > 1 : (GetSize() > GetMinSize() && GetSize() > 1);
+  }
+  return is_safe;
+}
+
 template class BPlusTreeLeafPage<GenericKey<4>, RID, GenericComparator<4>>;
 template class BPlusTreeLeafPage<GenericKey<8>, RID, GenericComparator<8>>;
 template class BPlusTreeLeafPage<GenericKey<16>, RID, GenericComparator<16>>;

@@ -65,6 +65,7 @@ TEST(BPlusTreeTests, DISABLED_InsertTest) {
 }
 
 TEST(BPlusTreeTests, MixTest) {
+  int64_t scale = 20;
   // create KeyComparator and index schema
   std::string createStmt = "a bigint";
   Schema *key_schema = ParseCreateStatement(createStmt);
@@ -85,7 +86,7 @@ TEST(BPlusTreeTests, MixTest) {
   (void)header_page;
 
   std::vector<int64_t> keys;
-  for (int64_t i = 1; i <= 1600; ++i) {
+  for (int64_t i = 1; i <= scale; ++i) {
     keys.emplace_back(i);
   }
 
@@ -103,24 +104,28 @@ TEST(BPlusTreeTests, MixTest) {
   }
 
   // tree.Print(bpm);
-  // for (auto iterator = tree.begin(); iterator != tree.end(); ++iterator) {
-  //   std::cout << (*iterator).second.GetSlotNum() << " ";
-  // }
-
+  for (auto iterator = tree.begin(); iterator != tree.end(); ++iterator) {
+    std::cout << (*iterator).second.GetSlotNum() << " ";
+  }
   std::cout << std::endl;
 
   std::vector<int64_t> remove_keys;
-  for (int64_t j = 0; j <= 1600; j = j + 2) {
+  for (int64_t j = 1; j <= scale; j = j + 2) {
     remove_keys.emplace_back(j);
   }
   std::random_shuffle(remove_keys.begin(), remove_keys.end());
 
-  for (auto key : remove_keys) {
-    index_key.SetFromInteger(key);
-    tree.Remove(index_key, transaction);
-  }
+  // for (auto key : remove_keys) {
+  //   index_key.SetFromInteger(key);
+  //   tree.Remove(index_key, transaction);
+  // }
 
+  for (auto iterator = tree.begin(); iterator != tree.end(); ++iterator) {
+    std::cout << (*iterator).second.GetSlotNum() << " ";
+  }
   std::cout << std::endl;
+
+  std::cout << transaction->GetPageSet()->size() << std::endl;
   for (auto key : remove_keys) {
     int64_t value = key & 0xFFFFFFFF;
     rid.Set(static_cast<int32_t>(key >> 32), value);
@@ -132,6 +137,8 @@ TEST(BPlusTreeTests, MixTest) {
   index_key.SetFromInteger(current_key);
 
   for (auto iterator = tree.begin(); iterator != tree.end(); ++iterator) {
+    auto location = (*iterator).second;
+    EXPECT_EQ(location.GetSlotNum(), current_key);
     current_key = current_key + 1;
   }
 

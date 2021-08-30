@@ -276,6 +276,17 @@ void B_PLUS_TREE_INTERNAL_PAGE_TYPE::CopyFirstFrom(const MappingType &pair, Buff
   IncreaseSize(1);
 }
 
+INDEX_TEMPLATE_ARGUMENTS
+bool B_PLUS_TREE_INTERNAL_PAGE_TYPE::IsSafe(BPlusTreeOpType op_type) {
+  bool is_safe = true;
+  if (op_type == BPlusTreeOpType::INSERT) {
+    is_safe = GetSize() < GetMaxSize();
+  } else if (op_type == BPlusTreeOpType::REMOVE) {
+    is_safe = IsRootPage() ? GetSize() > 2 : (GetSize() > GetMinSize() && GetSize() > 2);
+  }
+  return is_safe;
+}
+
 // valuetype for internalNode should be page id_t
 template class BPlusTreeInternalPage<GenericKey<4>, page_id_t, GenericComparator<4>>;
 template class BPlusTreeInternalPage<GenericKey<8>, page_id_t, GenericComparator<8>>;

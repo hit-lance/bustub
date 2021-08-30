@@ -67,6 +67,8 @@ class BPlusTreeLeafPage : public BPlusTreePage {
   void MoveLastToFrontOf(BPlusTreeLeafPage *recipient, const KeyType &middle_key,
                          BufferPoolManager *buffer_pool_manager = nullptr);
 
+  bool IsSafe(BPlusTreeOpType op_type);
+
  private:
   void CopyNFrom(MappingType *items, int size);
   void CopyLastFrom(const MappingType &item);
