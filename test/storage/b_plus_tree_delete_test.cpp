@@ -64,7 +64,7 @@ TEST(BPlusTreeTests, DISABLED_InsertTest) {
   remove("test.log");
 }
 
-TEST(BPlusTreeTests, MixTest) {
+TEST(BPlusTreeTests, DISABLED_MixTest) {
   int64_t scale = 20;
   // create KeyComparator and index schema
   std::string createStmt = "a bigint";
@@ -192,8 +192,10 @@ TEST(BPlusTreeTests, ScaleTest) {
   std::vector<int64_t> remove_keys = {1, 2, 3, 4, 5};
 
   for (auto key : remove_keys) {
+    // bpm->Print();
     index_key.SetFromInteger(key);
     tree.Remove(index_key, transaction);
+    // bpm->Print();
   }
 
   bpm->UnpinPage(HEADER_PAGE_ID, true);
