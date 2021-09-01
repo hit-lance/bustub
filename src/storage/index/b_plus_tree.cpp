@@ -227,6 +227,7 @@ void BPLUSTREE_TYPE::Remove(const KeyType &key, Transaction *transaction) {
     assert(new_leaf_size < leaf->GetMaxSize());
     bool deleted = old_leaf_size != new_leaf_size;
     if (deleted) {  // delete, and then CoalesceOrRedistribute
+      // std::cout<<"deleted"<<std::endl;
       CoalesceOrRedistribute(leaf, transaction);
     }
     UnlockAncestorPages(deleted, transaction);
@@ -326,6 +327,7 @@ bool BPLUSTREE_TYPE::Coalesce(N **neighbor_node, N **node,
     buffer_pool_manager_->UnpinPage((*neighbor_node)->GetPageId(), true);
     transaction->AddIntoDeletedPageSet((*node)->GetPageId());
   }
+  // std::cout<<(*parent)->GetSize()<<" "<<(*parent)->GetPageId()<<std::endl;
   return CoalesceOrRedistribute(*parent, transaction);
 }
 
@@ -345,12 +347,14 @@ void BPLUSTREE_TYPE::Redistribute(N *neighbor_node, N *node, int index) {
       reinterpret_cast<InternalPage *>(buffer_pool_manager_->FetchPage(node->GetParentPageId())->GetData());
   assert(parent != nullptr);
   assert(parent->GetSize() > 1);
+  // std::cout<<neighbor_node->GetPageId()<<" "<<node->GetPageId()<<" "<<index<<" "<<std::endl;
   if (index == 0) {  // node->neighbor_node
     KeyType new_middle_key = neighbor_node->KeyAt(1);
+    // std::cout<<parent->KeyAt(1)<<std::endl;
     neighbor_node->MoveFirstToEndOf(node, parent->KeyAt(1), buffer_pool_manager_);
     parent->SetKeyAt(1, new_middle_key);
   } else {  // neighbor_node->node
-    KeyType new_middle_key = neighbor_node->KeyAt(neighbor_node->GetSize());
+    KeyType new_middle_key = neighbor_node->KeyAt(neighbor_node->GetSize() - 1);
     neighbor_node->MoveLastToFrontOf(node, parent->KeyAt(index), buffer_pool_manager_);
     parent->SetKeyAt(index, new_middle_key);
   }

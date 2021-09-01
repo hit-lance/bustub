@@ -330,13 +330,76 @@ TEST(BPlusTreeConcurrentTest, DISABLED_MixTest) {
   remove("test.log");
 }
 
-TEST(BPlusTreeConcurrentTest, DISABLED_MixTest2) {
+TEST(BPlusTreeConcurrentTest, MixTest3) {
   // create KeyComparator and index schema
   Schema *key_schema = ParseCreateStatement("a bigint");
   GenericComparator<8> comparator(key_schema);
 
   DiskManager *disk_manager = new DiskManager("test.db");
-  BufferPoolManager *bpm = new BufferPoolManager(50, disk_manager);
+  BufferPoolManager *bpm = new BufferPoolManager(1000, disk_manager);
+  // create b+ tree
+  BPlusTree<GenericKey<8>, RID, GenericComparator<8>> tree("foo_pk", bpm, comparator);
+  // GenericKey<8> index_key;
+
+  // create and fetch header_page
+  page_id_t page_id;
+  auto header_page = bpm->NewPage(&page_id);
+  (void)header_page;
+
+  int64_t scale = 40000;
+
+  // first, populate index
+  std::vector<int64_t> keys;
+  for (int64_t i = 1; i <= scale; ++i) {
+    keys.emplace_back(i);
+  }
+  std::random_shuffle(keys.begin(), keys.end());
+  // for (auto &item : keys) {
+  //   std::cout << item << " ";
+  // }
+  // std::cout << std::endl;
+
+  std::vector<int64_t> remove_keys;
+  for (int64_t i = 2; i <= scale; i += 1) {
+    remove_keys.emplace_back(i);
+  }
+  // std::random_shuffle(remove_keys.begin(), remove_keys.end());
+  // for (auto &item : remove_keys) {
+  //   std::cout << item << " ";
+  // }
+  // std::cout << std::endl;
+  InsertHelper(&tree, keys);
+
+  // LaunchParallelTest(1, InsertHelper, &tree, keys);
+  // concurrent delete
+
+  // LaunchParallelTest(1, DeleteHelper, &tree, remove_keys);
+  DeleteHelper(&tree, remove_keys);
+  int64_t current_key = 2;
+  for (auto iterator = tree.begin(); iterator != tree.end(); ++iterator) {
+    std::cout << (*iterator).second.GetSlotNum() << " ";
+    // EXPECT_EQ((*iterator).second.GetSlotNum(), current_key);
+    current_key += 2;
+  }
+  std::cout << std::endl;
+
+  // EXPECT_EQ(size, 5);
+
+  bpm->UnpinPage(HEADER_PAGE_ID, true);
+  delete key_schema;
+  delete disk_manager;
+  delete bpm;
+  remove("test.db");
+  remove("test.log");
+}
+
+TEST(BPlusTreeConcurrentTest, DISABLED_MixTest1) {
+  // create KeyComparator and index schema
+  Schema *key_schema = ParseCreateStatement("a bigint");
+  GenericComparator<8> comparator(key_schema);
+
+  DiskManager *disk_manager = new DiskManager("test.db");
+  BufferPoolManager *bpm = new BufferPoolManager(1000, disk_manager);
   // create b+ tree
   BPlusTree<GenericKey<8>, RID, GenericComparator<8>> tree("foo_pk", bpm, comparator, 4, 4);
   // GenericKey<8> index_key;
@@ -346,32 +409,42 @@ TEST(BPlusTreeConcurrentTest, DISABLED_MixTest2) {
   auto header_page = bpm->NewPage(&page_id);
   (void)header_page;
 
-  int64_t scale = 80;
+  int64_t scale = 125;
 
   // first, populate index
   std::vector<int64_t> keys;
   for (int64_t i = 1; i <= scale; ++i) {
     keys.emplace_back(i);
-    std::cout << (i) << " ";
+  }
+  std::random_shuffle(keys.begin(), keys.end());
+  for (auto &item : keys) {
+    std::cout << item << " ";
   }
   std::cout << std::endl;
-  // std::random_shuffle(keys.begin(), keys.end());
 
   std::vector<int64_t> remove_keys;
-  for (int64_t i = 1; i <= 1; i++) {
+  for (int64_t i = 2; i <= scale; i += 1) {
     remove_keys.emplace_back(i);
   }
-  // std::random_shuffle(remove_keys.begin(), remove_keys.end());
-  // InsertHelper(&tree, keys);
+  std::random_shuffle(remove_keys.begin(), remove_keys.end());
+  for (auto &item : remove_keys) {
+    std::cout << item << " ";
+  }
+  std::cout << std::endl;
+  InsertHelper(&tree, keys);
 
-  LaunchParallelTest(1, InsertHelper, &tree, keys);
+  // LaunchParallelTest(1, InsertHelper, &tree, keys);
   // concurrent delete
 
-  LaunchParallelTest(2, DeleteHelper, &tree, keys);
-
-  // for (auto iterator = tree.begin(); iterator != tree.end(); ++iterator) {
-  //   std::cout << (*iterator).second.GetSlotNum() << " ";
-  // }
+  // LaunchParallelTest(1, DeleteHelper, &tree, remove_keys);
+  DeleteHelper(&tree, remove_keys);
+  int64_t current_key = 2;
+  for (auto iterator = tree.begin(); iterator != tree.end(); ++iterator) {
+    std::cout << (*iterator).second.GetSlotNum() << " ";
+    // EXPECT_EQ((*iterator).second.GetSlotNum(), current_key);
+    current_key += 2;
+  }
+  std::cout << std::endl;
 
   // EXPECT_EQ(size, 5);
 

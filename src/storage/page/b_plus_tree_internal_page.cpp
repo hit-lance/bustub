@@ -218,7 +218,7 @@ INDEX_TEMPLATE_ARGUMENTS
 void B_PLUS_TREE_INTERNAL_PAGE_TYPE::MoveFirstToEndOf(BPlusTreeInternalPage *recipient, const KeyType &middle_key,
                                                       BufferPoolManager *buffer_pool_manager) {
   ValueType first_value = array[0].second;
-  recipient->CopyFirstFrom({middle_key, first_value}, buffer_pool_manager);
+  recipient->CopyLastFrom({middle_key, first_value}, buffer_pool_manager);
   for (int i = 0; i < GetSize() - 1; ++i) {
     array[i] = array[i + 1];
   }
@@ -268,10 +268,10 @@ void B_PLUS_TREE_INTERNAL_PAGE_TYPE::CopyFirstFrom(const MappingType &pair, Buff
   for (int i = GetSize(); i > 1; --i) {
     array[i] = array[i - 1];
   }
-  // array[1].second = array[0].second;
-  // array[1].first = pair.first;
-  // array[0].second = pair.second;
-  array[1] = pair;
+  array[1].second = array[0].second;
+  array[1].first = pair.first;
+  array[0].second = pair.second;
+  // array[1] = pair;
   BPlusTreePage *page = reinterpret_cast<BPlusTreePage *>(buffer_pool_manager->FetchPage(pair.second)->GetData());
   assert(page != nullptr);
   page->SetParentPageId(GetPageId());
