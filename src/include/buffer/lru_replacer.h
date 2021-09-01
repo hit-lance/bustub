@@ -13,7 +13,6 @@
 #pragma once
 
 #include <cassert>
-#include <iostream>
 #include <list>
 #include <mutex>  // NOLINT
 #include <unordered_map>
@@ -47,14 +46,6 @@ class LRUReplacer : public Replacer {
   void Unpin(frame_id_t frame_id) override;
 
   size_t Size() override;
-
-  void Print() override {
-    std::cout << "replacer: ";
-    for (auto &item : list_) {
-      std::cout << item << " ";
-    }
-    std::cout << std::endl;
-  }
 
  private:
   size_t num_pages_;

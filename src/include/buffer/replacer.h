@@ -46,7 +46,6 @@ class Replacer {
   /** @return the number of elements in the replacer that can be victimized */
   virtual size_t Size() = 0;
 
-  virtual void Print() = 0;
 };
 
 }  // namespace bustub

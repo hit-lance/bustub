@@ -97,8 +97,7 @@ class BufferPoolManager {
   /** @return size of the buffer pool */
   size_t GetPoolSize() { return pool_size_; }
 
-  //  protected:
- public:
+ protected:
   /**
    * Grading function. Do not modify!
    * Invokes the callback function if it is not null.
@@ -152,20 +151,6 @@ class BufferPoolManager {
    * Flushes all the pages in the buffer pool to disk.
    */
   void FlushAllPagesImpl();
-
-  void Print() {
-    replacer_->Print();
-    std::cout << "free list: ";
-    for (auto &item : free_list_) {
-      std::cout << item << " ";
-    }
-    std::cout << std::endl;
-    std::cout << "page table: " << std::endl;
-    std::cout << "page\tframe\n";
-    for (auto &item : page_table_) {
-      std::cout << item.first << "\t" << item.second << std::endl;
-    }
-  }
 
   /** Number of pages in the buffer pool. */
   size_t pool_size_;
