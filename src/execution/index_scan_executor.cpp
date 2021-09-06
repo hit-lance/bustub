@@ -27,6 +27,7 @@ bool IndexScanExecutor::Next(Tuple *tuple, RID *rid) {
     if (!table_meta_data_->table_->GetTuple(*rid, tuple, exec_ctx_->GetTransaction())) {
       throw std::runtime_error("Failed to get tuple");
     }
+    *tuple = GenerateOutputTuple(*tuple);
     if (plan_->GetPredicate() == nullptr ||
         plan_->GetPredicate()->Evaluate(tuple, &table_meta_data_->schema_).GetAs<bool>()) {
       ++cur_index_iter_;
@@ -36,4 +37,11 @@ bool IndexScanExecutor::Next(Tuple *tuple, RID *rid) {
   return false;
 }
 
+Tuple IndexScanExecutor::GenerateOutputTuple(const Tuple& tuple) {
+  std::vector<Value> values;
+  for (auto &col:GetOutputSchema()->GetColumns()){
+    values.emplace_back(col.GetExpr()->Evaluate(&tuple, &table_meta_data_->schema_));
+  }
+  return {values, GetOutputSchema()};
+}
 }  // namespace bustub

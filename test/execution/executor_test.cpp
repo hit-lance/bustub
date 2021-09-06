@@ -211,7 +211,7 @@ TEST_F(ExecutorTest, DISABLED_SimpleRawInsertTest) {
 }
 
 // NOLINTNEXTLINE
-TEST_F(ExecutorTest, SimpleSelectInsertTest) {
+TEST_F(ExecutorTest, DISABLED_SimpleSelectInsertTest) {
   // INSERT INTO empty_table2 SELECT colA, colB FROM test_1 WHERE colA < 500
   std::unique_ptr<AbstractPlanNode> scan_plan1;
   const Schema *out_schema1;
@@ -333,7 +333,7 @@ TEST_F(ExecutorTest, DISABLED_SimpleRawInsertWithIndexTest) {
 }
 
 // NOLINTNEXTLINE
-TEST_F(ExecutorTest, DISABLED_SimpleDeleteTest) {
+TEST_F(ExecutorTest, SimpleDeleteTest) {
   // SELECT colA FROM test_1 WHERE colA == 50
   // DELETE FROM test_1 WHERE colA == 50
   // SELECT colA FROM test_1 WHERE colA == 50
@@ -352,7 +352,7 @@ TEST_F(ExecutorTest, DISABLED_SimpleDeleteTest) {
   auto index_info = GetExecutorContext()->GetCatalog()->CreateIndex<GenericKey<8>, RID, GenericComparator<8>>(
       GetTxn(), "index1", "test_1", GetExecutorContext()->GetCatalog()->GetTable("test_1")->schema_, *key_schema, {0},
       8);
-
+  std::cout<<index_info->index_oid_<<std::endl;
   // Execute
   std::vector<Tuple> result_set;
   GetExecutionEngine()->Execute(scan_plan1.get(), &result_set, GetTxn(), GetExecutorContext());
@@ -365,7 +365,6 @@ TEST_F(ExecutorTest, DISABLED_SimpleDeleteTest) {
   }
   ASSERT_EQ(result_set.size(), 1);
   Tuple index_key = Tuple(result_set[0]);
-
   std::unique_ptr<AbstractPlanNode> delete_plan;
   { delete_plan = std::make_unique<DeletePlanNode>(scan_plan1.get(), table_info->oid_); }
   GetExecutionEngine()->Execute(delete_plan.get(), nullptr, GetTxn(), GetExecutorContext());
@@ -373,10 +372,10 @@ TEST_F(ExecutorTest, DISABLED_SimpleDeleteTest) {
   result_set.clear();
   GetExecutionEngine()->Execute(scan_plan1.get(), &result_set, GetTxn(), GetExecutorContext());
   ASSERT_TRUE(result_set.empty());
-
   std::vector<RID> rids;
-
+  std::cout<<index_key.ToString(&schema)<<std::endl;
   index_info->index_->ScanKey(index_key, &rids, GetTxn());
+  std::cout<<rids.size()<<std::endl;
   ASSERT_TRUE(rids.empty());
 
   delete key_schema;

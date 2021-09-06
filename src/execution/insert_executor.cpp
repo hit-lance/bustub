@@ -21,14 +21,13 @@ InsertExecutor::InsertExecutor(ExecutorContext *exec_ctx, const InsertPlanNode *
 
 void InsertExecutor::Init() {
   table_meta_data_ = exec_ctx_->GetCatalog()->GetTable(plan_->TableOid());
+  indexes_ = exec_ctx_->GetCatalog()->GetTableIndexes(table_meta_data_->name_);
   if (plan_->IsRawInsert()) {
     insert_values_ = plan_->RawValues();
+    value_iter_ = insert_values_.begin();
   } else {
     child_executor_->Init();
   }
-
-  value_iter_ = insert_values_.begin();
-  indexes_ = exec_ctx_->GetCatalog()->GetTableIndexes(table_meta_data_->name_);
 }
 
 bool InsertExecutor::Next([[maybe_unused]] Tuple *tuple, RID *rid) {

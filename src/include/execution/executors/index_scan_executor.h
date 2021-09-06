@@ -41,6 +41,8 @@ class IndexScanExecutor : public AbstractExecutor {
 
   bool Next(Tuple *tuple, RID *rid) override;
 
+  Tuple GenerateOutputTuple(const Tuple& tuple);
+
  private:
   /** The index scan plan node to be executed. */
   const IndexScanPlanNode *plan_;
