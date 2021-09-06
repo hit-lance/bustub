@@ -140,7 +140,7 @@ class ExecutorTest : public ::testing::Test {
 };
 
 // NOLINTNEXTLINE
-TEST_F(ExecutorTest, SimpleSeqScanTest) {
+TEST_F(ExecutorTest, DISABLED_SimpleSeqScanTest) {
   // SELECT colA, colB FROM test_1 WHERE colA < 500
 
   // Construct query plan
@@ -181,7 +181,6 @@ TEST_F(ExecutorTest, DISABLED_SimpleRawInsertTest) {
   InsertPlanNode insert_plan{std::move(raw_vals), table_info->oid_};
 
   GetExecutionEngine()->Execute(&insert_plan, nullptr, GetTxn(), GetExecutorContext());
-
   // Iterate through table make sure that values were inserted.
   // SELECT * FROM empty_table2;
   auto &schema = table_info->schema_;
@@ -189,10 +188,8 @@ TEST_F(ExecutorTest, DISABLED_SimpleRawInsertTest) {
   auto colB = MakeColumnValueExpression(schema, 0, "colB");
   auto out_schema = MakeOutputSchema({{"colA", colA}, {"colB", colB}});
   SeqScanPlanNode scan_plan{out_schema, nullptr, table_info->oid_};
-
   std::vector<Tuple> result_set;
   GetExecutionEngine()->Execute(&scan_plan, &result_set, GetTxn(), GetExecutorContext());
-
   std::cout << "ColA, ColB" << std::endl;
   // First value
   ASSERT_EQ(result_set[0].GetValue(out_schema, out_schema->GetColIdx("colA")).GetAs<int32_t>(), 100);
@@ -214,7 +211,7 @@ TEST_F(ExecutorTest, DISABLED_SimpleRawInsertTest) {
 }
 
 // NOLINTNEXTLINE
-TEST_F(ExecutorTest, DISABLED_SimpleSelectInsertTest) {
+TEST_F(ExecutorTest, SimpleSelectInsertTest) {
   // INSERT INTO empty_table2 SELECT colA, colB FROM test_1 WHERE colA < 500
   std::unique_ptr<AbstractPlanNode> scan_plan1;
   const Schema *out_schema1;
@@ -281,7 +278,7 @@ TEST_F(ExecutorTest, DISABLED_SimpleRawInsertWithIndexTest) {
   GenericComparator<8> comparator(key_schema);
   auto index_info = GetExecutorContext()->GetCatalog()->CreateIndex<GenericKey<8>, RID, GenericComparator<8>>(
       GetTxn(), "index1", "empty_table2", table_info->schema_, *key_schema, {0}, 8);
-
+  assert(index_info);
   GetExecutionEngine()->Execute(&insert_plan, nullptr, GetTxn(), GetExecutorContext());
 
   // Iterate through table make sure that values were inserted.

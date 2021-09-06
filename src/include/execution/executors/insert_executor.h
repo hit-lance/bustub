@@ -44,8 +44,15 @@ class InsertExecutor : public AbstractExecutor {
   // We return false if the insert failed for any reason, and return true if all inserts succeeded.
   bool Next([[maybe_unused]] Tuple *tuple, RID *rid) override;
 
+  void InsertTuple(Tuple &tuple, RID *rid);
+
  private:
   /** The insert plan node to be executed. */
   const InsertPlanNode *plan_;
+  std::unique_ptr<AbstractExecutor> child_executor_;
+  TableMetadata *table_meta_data_;
+  std::vector<std::vector<bustub::Value>> insert_values_;
+  std::vector<std::vector<bustub::Value>>::const_iterator value_iter_;
+  std::vector<IndexInfo *> indexes_;
 };
 }  // namespace bustub

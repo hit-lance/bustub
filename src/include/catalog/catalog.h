@@ -79,7 +79,7 @@ class Catalog {
     BUSTUB_ASSERT(names_.count(table_name) == 0, "Table names should be unique!");
     std::unique_ptr<TableHeap> table(new TableHeap(bpm_, lock_manager_, log_manager_, txn));
     TableMetadata *table_meta_data = new TableMetadata(schema, table_name, std::move(table), next_table_oid_);
-    tables_[next_table_oid_] = std::move(std::unique_ptr<TableMetadata>(table_meta_data));
+    tables_[next_table_oid_] = std::unique_ptr<TableMetadata>(table_meta_data);
     names_[table_name] = next_table_oid_;
     ++next_table_oid_;
     return table_meta_data;
@@ -88,7 +88,7 @@ class Catalog {
   /** @return table metadata by name */
   TableMetadata *GetTable(const std::string &table_name) {
     if (names_.find(table_name) == names_.end()) {
-      throw std::out_of_range(table_name + " does not exist");
+      throw std::out_of_range("table does not exist");
     }
     return GetTable(names_[table_name]);
   }
@@ -96,7 +96,7 @@ class Catalog {
   /** @return table metadata by oid */
   TableMetadata *GetTable(table_oid_t table_oid) {
     if (tables_.find(table_oid) == tables_.end()) {
-      throw std::out_of_range(table_oid + " does not exist");
+      throw std::out_of_range("table does not exist");
     }
     return tables_[table_oid].get();
   }
@@ -120,33 +120,33 @@ class Catalog {
     std::unique_ptr<Index> index(new BPlusTreeIndex<KeyType, ValueType, KeyComparator>(index_meta_data, bpm_));
     IndexInfo *index_info =
         new IndexInfo(key_schema, index_name, std::move(index), next_index_oid_, table_name, keysize);
-    indexes_[next_index_oid_] = std::move(std::unique_ptr<IndexInfo>(index_info));
+    indexes_[next_index_oid_] = std::unique_ptr<IndexInfo>(index_info);
     index_names_[table_name] = std::unordered_map<std::string, index_oid_t>({{index_name, next_index_oid_}});
     ++next_index_oid_;
-    return nullptr;
+    return index_info;
   }
 
   IndexInfo *GetIndex(const std::string &index_name, const std::string &table_name) {
     if (index_names_.find(table_name) == index_names_.end()) {
-      throw std::out_of_range(table_name + " does not exist");
+      throw std::out_of_range("table does not exist");
     }
     if (index_names_[table_name].find(index_name) == index_names_[table_name].end()) {
-      throw std::out_of_range(index_name + " does not exist");
+      throw std::out_of_range("index does not exist");
     }
     return GetIndex(index_names_[table_name][index_name]);
   }
 
   IndexInfo *GetIndex(index_oid_t index_oid) {
     if (indexes_.find(index_oid) == indexes_.end()) {
-      throw std::out_of_range(index_oid + " does not exist");
+      throw std::out_of_range("index does not exist");
     }
     return indexes_[index_oid].get();
   }
 
   std::vector<IndexInfo *> GetTableIndexes(const std::string &table_name) {
     std::vector<IndexInfo *> indexes;
-    for (auto &[index_name, index_oid] : index_names_[table_name]) {
-      indexes.emplace_back(GetIndex(index_oid));
+    for (auto &item : index_names_[table_name]) {
+      indexes.emplace_back(GetIndex(item.second));
     }
     return indexes;
   }
