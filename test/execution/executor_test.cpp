@@ -346,13 +346,14 @@ TEST_F(ExecutorTest, DISABLED_SimpleDeleteTest) {
   auto predicate = MakeComparisonExpression(colA, const50, ComparisonType::Equal);
   auto out_schema1 = MakeOutputSchema({{"colA", colA}});
   auto scan_plan1 = std::make_unique<SeqScanPlanNode>(out_schema1, predicate, table_info->oid_);
+
   // index
   Schema *key_schema = ParseCreateStatement("a bigint");
   GenericComparator<8> comparator(key_schema);
   auto index_info = GetExecutorContext()->GetCatalog()->CreateIndex<GenericKey<8>, RID, GenericComparator<8>>(
       GetTxn(), "index1", "test_1", GetExecutorContext()->GetCatalog()->GetTable("test_1")->schema_, *key_schema, {0},
       8);
-  std::cout << index_info->index_oid_ << std::endl;
+
   // Execute
   std::vector<Tuple> result_set;
   GetExecutionEngine()->Execute(scan_plan1.get(), &result_set, GetTxn(), GetExecutorContext());
@@ -373,9 +374,7 @@ TEST_F(ExecutorTest, DISABLED_SimpleDeleteTest) {
   GetExecutionEngine()->Execute(scan_plan1.get(), &result_set, GetTxn(), GetExecutorContext());
   ASSERT_TRUE(result_set.empty());
   std::vector<RID> rids;
-  std::cout << index_key.ToString(&schema) << std::endl;
   index_info->index_->ScanKey(index_key, &rids, GetTxn());
-  std::cout << rids.size() << std::endl;
   ASSERT_TRUE(rids.empty());
 
   delete key_schema;

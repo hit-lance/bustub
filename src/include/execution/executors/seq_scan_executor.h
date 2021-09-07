@@ -46,6 +46,6 @@ class SeqScanExecutor : public AbstractExecutor {
   const SeqScanPlanNode *plan_;
 
   TableMetadata *table_meta_data_;
-  TableIterator cur_table_iter_ = table_meta_data_->table_->Begin(exec_ctx_->GetTransaction());
+  TableIterator cur_table_iter_ = {nullptr, RID{}, nullptr};
 };
 }  // namespace bustub

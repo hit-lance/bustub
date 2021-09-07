@@ -18,14 +18,14 @@ SeqScanExecutor::SeqScanExecutor(ExecutorContext *exec_ctx, const SeqScanPlanNod
       plan_(plan),
       table_meta_data_(exec_ctx_->GetCatalog()->GetTable(plan_->GetTableOid())) {}
 
-void SeqScanExecutor::Init() {}
+void SeqScanExecutor::Init() { cur_table_iter_ = table_meta_data_->table_->Begin(exec_ctx_->GetTransaction()); }
 
 bool SeqScanExecutor::Next(Tuple *tuple, RID *rid) {
   for (; cur_table_iter_ != table_meta_data_->table_->End(); ++cur_table_iter_) {
     *tuple = GenerateOutputTuple(*cur_table_iter_);
-    *rid = tuple->GetRid();
+    *rid = cur_table_iter_->GetRid();
     if (plan_->GetPredicate() == nullptr ||
-        plan_->GetPredicate()->Evaluate(tuple, plan_->OutputSchema()).GetAs<bool>()) {
+        plan_->GetPredicate()->Evaluate(tuple, &table_meta_data_->schema_).GetAs<bool>()) {
       ++cur_table_iter_;
       return true;
     }
