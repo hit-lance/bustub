@@ -27,7 +27,7 @@ void UpdateExecutor::Init() {
 
 bool UpdateExecutor::Next([[maybe_unused]] Tuple *tuple, RID *rid) {
   if (child_executor_->Next(tuple, rid)) {
-    Tuple new_tuple(std::move(GenerateUpdatedTuple(*tuple)));
+    Tuple new_tuple(GenerateUpdatedTuple(*tuple));
     if (!table_meta_data_->table_->UpdateTuple(new_tuple, *rid, exec_ctx_->GetTransaction())) {
       throw std::runtime_error("update tuple failed. ");
     }

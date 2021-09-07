@@ -55,7 +55,6 @@ Tuple NestedLoopJoinExecutor::JoinTuple(Tuple *left_tuple, Tuple *right_tuple) {
     values.emplace_back(col.GetExpr()->EvaluateJoin(left_tuple, left_executor_->GetOutputSchema(), right_tuple,
                                                     right_executor_->GetOutputSchema()));
   }
-
   return Tuple{values, GetOutputSchema()};
 }
 
