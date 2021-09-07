@@ -333,7 +333,7 @@ TEST_F(ExecutorTest, DISABLED_SimpleRawInsertWithIndexTest) {
 }
 
 // NOLINTNEXTLINE
-TEST_F(ExecutorTest, SimpleDeleteTest) {
+TEST_F(ExecutorTest, DISABLED_SimpleDeleteTest) {
   // SELECT colA FROM test_1 WHERE colA == 50
   // DELETE FROM test_1 WHERE colA == 50
   // SELECT colA FROM test_1 WHERE colA == 50
@@ -352,7 +352,7 @@ TEST_F(ExecutorTest, SimpleDeleteTest) {
   auto index_info = GetExecutorContext()->GetCatalog()->CreateIndex<GenericKey<8>, RID, GenericComparator<8>>(
       GetTxn(), "index1", "test_1", GetExecutorContext()->GetCatalog()->GetTable("test_1")->schema_, *key_schema, {0},
       8);
-  std::cout<<index_info->index_oid_<<std::endl;
+  std::cout << index_info->index_oid_ << std::endl;
   // Execute
   std::vector<Tuple> result_set;
   GetExecutionEngine()->Execute(scan_plan1.get(), &result_set, GetTxn(), GetExecutorContext());
@@ -373,16 +373,16 @@ TEST_F(ExecutorTest, SimpleDeleteTest) {
   GetExecutionEngine()->Execute(scan_plan1.get(), &result_set, GetTxn(), GetExecutorContext());
   ASSERT_TRUE(result_set.empty());
   std::vector<RID> rids;
-  std::cout<<index_key.ToString(&schema)<<std::endl;
+  std::cout << index_key.ToString(&schema) << std::endl;
   index_info->index_->ScanKey(index_key, &rids, GetTxn());
-  std::cout<<rids.size()<<std::endl;
+  std::cout << rids.size() << std::endl;
   ASSERT_TRUE(rids.empty());
 
   delete key_schema;
 }
 
 // NOLINTNEXTLINE
-TEST_F(ExecutorTest, DISABLED_SimpleNestedLoopJoinTest) {
+TEST_F(ExecutorTest, SimpleNestedLoopJoinTest) {
   // SELECT test_1.colA, test_1.colB, test_2.col1, test_2.col3 FROM test_1 JOIN test_2 ON test_1.colA = test_2.col1
   std::unique_ptr<AbstractPlanNode> scan_plan1;
   const Schema *out_schema1;

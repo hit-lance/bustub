@@ -37,9 +37,9 @@ bool IndexScanExecutor::Next(Tuple *tuple, RID *rid) {
   return false;
 }
 
-Tuple IndexScanExecutor::GenerateOutputTuple(const Tuple& tuple) {
+Tuple IndexScanExecutor::GenerateOutputTuple(const Tuple &tuple) {
   std::vector<Value> values;
-  for (auto &col:GetOutputSchema()->GetColumns()){
+  for (auto &col : GetOutputSchema()->GetColumns()) {
     values.emplace_back(col.GetExpr()->Evaluate(&tuple, &table_meta_data_->schema_));
   }
   return {values, GetOutputSchema()};

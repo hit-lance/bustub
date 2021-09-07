@@ -14,6 +14,7 @@
 
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include "execution/executor_context.h"
 #include "execution/executors/abstract_executor.h"
@@ -44,7 +45,7 @@ class InsertExecutor : public AbstractExecutor {
   // We return false if the insert failed for any reason, and return true if all inserts succeeded.
   bool Next([[maybe_unused]] Tuple *tuple, RID *rid) override;
 
-  void InsertTuple(Tuple &tuple, RID *rid);
+  void InsertTuple(Tuple *tuple, RID *rid);
 
  private:
   /** The insert plan node to be executed. */
