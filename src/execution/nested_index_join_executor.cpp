@@ -20,8 +20,8 @@ NestIndexJoinExecutor::NestIndexJoinExecutor(ExecutorContext *exec_ctx, const Ne
 
 void NestIndexJoinExecutor::Init() {
   inner_table_meta_data_ = exec_ctx_->GetCatalog()->GetTable(plan_->GetInnerTableOid());
-  std::vector<IndexInfo *> inner_indexes = exec_ctx_->GetCatalog()->GetTableIndexes(inner_table_meta_data_->name_);
   index_ = exec_ctx_->GetCatalog()->GetIndex(plan_->GetIndexName(), inner_table_meta_data_->name_);
+  assert(index_);
   child_executor_->Init();
 }
 
@@ -43,9 +43,15 @@ bool NestIndexJoinExecutor::Next(Tuple *tuple, RID *rid) {
 }
 
 Tuple NestIndexJoinExecutor::GenerateKeyTuple(const Tuple &tuple) {
+  std::cout << tuple.ToString(plan_->GetChildPlan()->OutputSchema()) << std::endl;
+  std::cout << plan_->GetChildPlan()->OutputSchema()->ToString() << std::endl;
+  std::cout << plan_->OuterTableSchema()->ToString() << std::endl;
+  std::cout << plan_->InnerTableSchema()->ToString() << std::endl;
+  std::cout << index_->key_schema_.ToString() << std::endl;
   std::vector<Value> values;
-  for (auto &col : index_->index_->GetKeySchema()->GetColumns()) {
-    values.emplace_back(col.GetExpr()->Evaluate(&tuple, child_executor_->GetOutputSchema()));
+  for (auto &col : plan_->GetChildPlan()->OutputSchema()->GetColumns()) {
+    assert(col.GetExpr());
+    values.emplace_back(col.GetExpr()->Evaluate(&tuple, plan_->GetChildPlan()->OutputSchema()));
   }
   return {values, index_->index_->GetKeySchema()};
 }
