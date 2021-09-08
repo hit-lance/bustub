@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include <memory>
@@ -78,11 +79,11 @@ class Catalog {
   TableMetadata *CreateTable(Transaction *txn, const std::string &table_name, const Schema &schema) {
     BUSTUB_ASSERT(names_.count(table_name) == 0, "Table names should be unique!");
     std::unique_ptr<TableHeap> table(new TableHeap(bpm_, lock_manager_, log_manager_, txn));
-    TableMetadata *table_meta_data = new TableMetadata(schema, table_name, std::move(table), next_table_oid_);
-    tables_[next_table_oid_] = std::unique_ptr<TableMetadata>(table_meta_data);
+    std::unique_ptr<TableMetadata> table_meta_data(
+        new TableMetadata(schema, table_name, std::move(table), next_table_oid_));
+    tables_[next_table_oid_] = std::move(table_meta_data);
     names_[table_name] = next_table_oid_;
-    ++next_table_oid_;
-    return table_meta_data;
+    return tables_[next_table_oid_++].get();
   }
 
   /** @return table metadata by name */
@@ -118,12 +119,20 @@ class Catalog {
                          size_t keysize) {
     IndexMetadata *index_meta_data = new IndexMetadata(index_name, table_name, &schema, key_attrs);
     std::unique_ptr<Index> index(new BPlusTreeIndex<KeyType, ValueType, KeyComparator>(index_meta_data, bpm_));
-    IndexInfo *index_info =
-        new IndexInfo(key_schema, index_name, std::move(index), next_index_oid_, table_name, keysize);
-    indexes_[next_index_oid_] = std::unique_ptr<IndexInfo>(index_info);
-    index_names_[table_name] = std::unordered_map<std::string, index_oid_t>({{index_name, next_index_oid_}});
-    ++next_index_oid_;
-    return index_info;
+    std::unique_ptr<IndexInfo> index_info(
+        new IndexInfo(key_schema, index_name, std::move(index), next_index_oid_, table_name, keysize));
+    indexes_[next_index_oid_] = std::move(index_info);
+    index_names_[table_name][index_name] = next_index_oid_;
+
+    // populate existing data
+    TableMetadata *table_meta_data = GetTable(table_name);
+    assert(table_meta_data);
+    for (auto table_iter = table_meta_data->table_->Begin(txn); table_iter != table_meta_data->table_->End();
+         ++table_iter) {
+      indexes_[next_index_oid_]->index_->InsertEntry(table_iter->KeyFromTuple(schema, key_schema, key_attrs),
+                                                     table_iter->GetRid(), txn);
+    }
+    return indexes_[next_index_oid_++].get();
   }
 
   IndexInfo *GetIndex(const std::string &index_name, const std::string &table_name) {
