@@ -49,7 +49,7 @@ class NestIndexJoinExecutor : public AbstractExecutor {
 
   Tuple JoinTuple(Tuple *left_tuple, Tuple *right_tuple);
 
-  Tuple GenerateKeyTuple(const Tuple &tuple);
+  Tuple GenerateKeyTuple(const Tuple &tuple, const Schema *key_schema);
 
  private:
   /** The nested index join plan node. */

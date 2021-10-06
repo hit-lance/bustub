@@ -1,3 +1,4 @@
+
 //===----------------------------------------------------------------------===//
 //
 //                         BusTub
@@ -30,7 +31,7 @@ bool NestIndexJoinExecutor::Next(Tuple *tuple, RID *rid) {
   Tuple left_tuple;
   RID tmp;
   while (child_executor_->Next(&left_tuple, &tmp)) {
-    Tuple index_key = GenerateKeyTuple(left_tuple);
+    Tuple index_key = GenerateKeyTuple(left_tuple, index_->index_->GetKeySchema());
     std::vector<RID> result;
     index_->index_->ScanKey(index_key, &result, GetExecutorContext()->GetTransaction());
     if (!result.empty()) {
@@ -43,14 +44,11 @@ bool NestIndexJoinExecutor::Next(Tuple *tuple, RID *rid) {
   return false;
 }
 
-Tuple NestIndexJoinExecutor::GenerateKeyTuple(const Tuple &tuple) {
-  std::vector<uint32_t> key_attrs;
-  for (auto &col : index_->index_->GetKeySchema()->GetColumns()) {
-    std::cout << col.GetName() << std::endl;
-    key_attrs.emplace_back(plan_->OuterTableSchema()->GetColIdx(col.GetName()));
-  }
-  Tuple new_tuple(tuple);
-  return new_tuple.KeyFromTuple(*plan_->OuterTableSchema(), *index_->index_->GetKeySchema(), key_attrs);
+Tuple NestIndexJoinExecutor::GenerateKeyTuple(const Tuple &tuple, const Schema *key_schema) {
+  std::vector<Value> values;
+  Value v = plan_->Predicate()->GetChildAt(0)->Evaluate(&tuple, key_schema);
+  values.emplace_back(v);
+  return Tuple{values, key_schema};
 }
 
 Tuple NestIndexJoinExecutor::JoinTuple(Tuple *left_tuple, Tuple *right_tuple) {
