@@ -48,7 +48,11 @@ class LockManager {
     std::list<LockRequest> request_queue_;
     std::condition_variable cv_;  // for notifying blocked transactions on this rid
     bool upgrading_ = false;
+    size_t shared_lock_cnt_ = 0;
+    bool exclusive_lock_granted_ = false;
   };
+
+  enum class GraphNodeState { UNVISITED, VISITING, VISITED };
 
  public:
   /**
@@ -117,6 +121,9 @@ class LockManager {
 
   /** Removes an edge from t1 -> t2. */
   void RemoveEdge(txn_id_t t1, txn_id_t t2);
+
+  /** Removes node t and all edges to t*/
+  void RemoveNode(txn_id_t t);
 
   /**
    * Checks if the graph has a cycle, returning the newest transaction ID in the cycle if so.
